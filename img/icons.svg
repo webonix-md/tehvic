@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="laptop" viewBox="0 0 24 24"><rect x="4" y="4.5" width="16" height="11" rx=".5"/><path d="M2 19h20l-1.5-3.5h-17z"/><path d="M10.5 17.3h3"/></symbol>
+  <symbol id="pc" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx=".5"/><path d="M10 6h4M10 8.5h4"/><circle cx="12" cy="16.5" r="1.6"/></symbol>
+  <symbol id="imac" viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="14" rx="1"/><path d="M2.5 14h19M10 17.5l-1 3h6l-1-3"/><circle cx="12" cy="15.8" r=".2"/></symbol>
+  <symbol id="chip" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 3v3.5M12 3v3.5M15 3v3.5M9 17.5V21M12 17.5V21M15 17.5V21M3 9h3.5M3 12h3.5M3 15h3.5M17.5 9H21M17.5 12H21M17.5 15H21"/></symbol>
+  <symbol id="disk" viewBox="0 0 24 24"><rect x="4" y="2.5" width="16" height="19" rx="1"/><circle cx="12" cy="10" r="4.5"/><circle cx="12" cy="10" r="1"/><path d="M12 11l3.5 6.5M7 18.5h1.5"/></symbol>
+  <symbol id="code" viewBox="0 0 24 24"><rect x="2.5" y="3.5" width="19" height="17" rx=".5"/><path d="M2.5 7.5h19M8 12l-2.5 2.5L8 17M16 12l2.5 2.5L16 17M13 11.5l-2 6"/></symbol>
+  <symbol id="server" viewBox="0 0 24 24"><rect x="3.5" y="3" width="17" height="5.5"/><rect x="3.5" y="9.25" width="17" height="5.5"/><rect x="3.5" y="15.5" width="17" height="5.5"/><path d="M6.5 5.75h1M6.5 12h1M6.5 18.25h1M13 5.75h4.5M13 12h4.5M13 18.25h4.5"/></symbol>
+  <symbol id="monitor" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx=".5"/><path d="M12 17v3.5M7.5 20.5h9"/></symbol>
+  <symbol id="ups" viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx=".5"/><path d="M12.8 6.5l-3 5.2h3.4l-1 5.3 3-6h-3.4z"/></symbol>
+  <symbol id="printer" viewBox="0 0 24 24"><path d="M6.5 9V3h11v6"/><rect x="2.5" y="9" width="19" height="8.5" rx=".5"/><path d="M6.5 14h11v7h-11z"/><path d="M17.5 11.5h1"/></symbol>
+  <symbol id="office" viewBox="0 0 24 24"><path d="M3 21V5.5L12 3v18M12 8h9v13M2 21h20"/><path d="M6 8h3M6 11.5h3M6 15h3M15 11.5h3M15 15h3"/></symbol>
+  <symbol id="phone" viewBox="0 0 24 24"><path d="M5 3.5h4l1.5 4.5-2.5 1.5a11 11 0 0 0 6.5 6.5l1.5-2.5 4.5 1.5v4a1.5 1.5 0 0 1-1.6 1.5A17 17 0 0 1 3.5 5.1 1.5 1.5 0 0 1 5 3.5z"/></symbol>
+  <symbol id="chat" viewBox="0 0 24 24"><path d="M4.5 19.5l1.2-3.8A8 8 0 1 1 8.6 18.6z"/><path d="M9 10.5h6M9 13.5h4"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M12 21.5s-7-6.3-7-12a7 7 0 0 1 14 0c0 5.7-7 12-7 12z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  <symbol id="mail" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx=".5"/><path d="M3 5.5l9 7 9-7"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="menu" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></symbol>
+  <symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2.5L4.5 13.5h6.5l-1 8 8.5-11h-6.5z"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></symbol>
+  <symbol id="doc" viewBox="0 0 24 24"><path d="M6 2.5h8.5l4 4v15H6z"/><path d="M14 2.5v4.5h4.5M9 12h7M9 15h7M9 18h4"/></symbol>
+  <symbol id="wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.5 17.2a1.6 1.6 0 0 0 0 2.3l1 1a1.6 1.6 0 0 0 2.3 0l5.8-5.8a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></symbol>
+</svg>
