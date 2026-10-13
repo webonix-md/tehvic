@@ -739,3 +739,18 @@ main:focus{outline:none}
 .hpick__pause .ico{width:16px;height:16px;stroke-width:2.2}
 .hpick__pause[hidden]{display:none}
 @media (prefers-reduced-motion:reduce){.hpick__pause{display:none}}
+
+/* ---------- Объёмные заголовки ----------
+   Объём — стопка теней text-shadow: каждый слой на шаг (0.01em) ниже-правее и темнее + мягкая тень на фон.
+   Чтобы уменьшить объём — убрать последний слой перед мягкой тенью; добавить — дописать слой с шагом +0.01em. */
+:root{
+  --x3d:0.010em 0.011em 0 #1F2024,0.020em 0.022em 0 #0C0D0F,0.06em 0.09em 0.14em rgba(30,30,25,.24);                 /* графитовые, 2 слоя */
+  --x3d-sm:0.010em 0.011em 0 #1A1B1F,0.04em 0.07em 0.1em rgba(30,30,25,.18);                                            /* заголовки секций, 1 слой */
+  --x3d-acc:0.010em 0.011em 0 #C9530A,0.020em 0.022em 0 #B54A06,0.030em 0.033em 0 #A04003,0.07em 0.1em 0.16em rgba(255,110,20,.25);  /* оранжевые, 3 слоя */
+  --x3d-light:0.010em 0.011em 0 #C4C6CC,0.020em 0.022em 0 #A9ABB2,0.030em 0.033em 0 #8E9098,0.06em 0.09em 0.12em rgba(0,0,0,.55);     /* белые на тёмном, 3 слоя */
+  --h-ink:#41444B;   /* цвет графитовых заголовков — чуть светлее текста, чтобы грань была заметна */
+}
+.hero .h1,.phead .h1{color:var(--h-ink);text-shadow:var(--x3d);padding-bottom:.08em}
+.hero .h1 em{color:var(--accent);text-shadow:var(--x3d-acc)}
+.sec:not(.sec--dark) .h2{color:var(--h-ink);text-shadow:var(--x3d-sm)}
+.sec--dark .h2{text-shadow:var(--x3d-light)}
