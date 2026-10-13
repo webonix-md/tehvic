@@ -555,7 +555,7 @@ a.cell:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
 @media (max-width:640px){
   .ptable th{font-size:10px;letter-spacing:.02em;padding-left:4px;padding-right:4px}
   .ptable td.pp{padding-left:14px;padding-right:14px;font-size:14px}
-  .ptable td.pp small{display:block;margin:0 0 2px;font-size:10.5px}
+  .ptable td.pp small{display:block;height:0;line-height:1;transform:translateY(-1.15em);margin:0;font-size:10.5px}  /* «от» над числом, не сдвигает цифры */
   .ptable td.pc i{white-space:normal;font-size:12px;line-height:1.2;display:block}
   .ptable td.pn{padding-right:6px}
 }
