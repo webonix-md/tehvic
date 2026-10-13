@@ -50,7 +50,7 @@ ul,ol{margin:0;padding:0;list-style:none}
 .sec--dark .sec__in{background:var(--surface);border-radius:36px;box-shadow:var(--sh-lg);padding:64px 56px;margin:24px 0;position:relative;overflow:hidden}
 .sec--dark .sec__in::before{content:"";position:absolute;right:-120px;top:-160px;width:420px;height:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,122,26,.16),rgba(255,122,26,0));pointer-events:none}
 
-.split{display:grid;grid-template-columns:3fr 9fr;gap:40px}
+.split{display:grid;grid-template-columns:1.25fr 9fr;gap:40px}
 .split__meta{padding-top:10px}
 
 /* ---------- Типографика ---------- */
