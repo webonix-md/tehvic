@@ -652,3 +652,47 @@ a.cell:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
 /* ---------- Шапка таблицы прайса прилипает при прокрутке ----------
    --thead-top: отступ сверху; на странице «Цены» JS ставит высоту панели поиска. */
 .ptable thead th{position:sticky;top:var(--thead-top,0px);z-index:3;background:var(--surface);box-shadow:0 1px 0 var(--line)}
+
+/* ---------- Планшет (961–1180px): меню в одну строку ---------- */
+.nav__a{white-space:nowrap}
+@media (min-width:961px) and (max-width:1180px){
+  .header>.wrap{gap:14px}
+  .nav{gap:0}
+  .nav__a{padding:10px 8px;font-size:14px}
+  .header .logo__txt span{display:none}
+  .header__cta .btn{padding:0 14px}
+}
+
+/* ---------- Телефон: кнопка поиска в шапке — широкая, как поле ---------- */
+@media (max-width:960px){
+  .burger--search{flex:1 1 auto;justify-content:flex-start;display:flex;align-items:center;gap:10px;width:auto !important;max-width:360px;margin:0 0 0 auto;padding:0 14px;
+    background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);border-radius:14px;color:var(--muted);font:400 14.5px/1 var(--sans);text-align:left;white-space:nowrap;overflow:hidden}
+  .burger--search .ico{width:19px;height:19px;flex:none;color:var(--ink-2)}
+  .burger--search span{overflow:hidden;text-overflow:ellipsis}
+  .header__cta{display:none}
+  .burger--search + .burger{margin-left:8px}
+}
+@media (max-width:640px){
+  .header>.wrap{gap:10px}
+  .burger--search{margin-left:6px;width:auto !important;min-width:0}
+  .burger--search + .burger{margin-left:0}
+}
+
+/* Планшет: в верхней строке без улицы и часов — иначе переносится */
+@media (min-width:961px) and (max-width:1180px){.topbar .hide-s,.topbar .hide-m{display:none}}
+@media (max-width:359px){.header .logo__txt{display:none}}
+
+/* ---------- Воздух между блоками: тени не «наползают» на соседей ---------- */
+.sec--dark .sec__in{margin-bottom:44px}
+.footer{padding-top:8px}
+@media (max-width:960px){
+  .hpick__panel{margin-bottom:28px}
+  .cats{padding-top:4px}
+}
+@media (max-width:640px){
+  .sec--dark .sec__in{margin-bottom:36px;box-shadow:0 26px 40px -30px rgba(20,20,15,.5)}
+  .hpick__panel{margin-bottom:24px}
+}
+@media (max-width:960px){
+  .hpick__panel{margin-bottom:36px;box-shadow:var(--sh)}   /* короткая тень — не ложится на плитки ниже */
+}
