@@ -189,7 +189,12 @@
     };
     var order = ["laptop", "pc", "office", "server"];
     var tabs = hp.querySelectorAll(".hpick__tab");
-    var auto = null;
+    var auto = null, picked = false, idx = 0;
+    var stopAuto = function () { clearInterval(auto); auto = null; };
+    var startAuto = function () {
+      if (auto || picked) return;
+      auto = setInterval(function () { idx = (idx + 1) % order.length; show(order[idx]); }, 4200);
+    };
 
     var show = function (key) {
       var cat = getCat(key), cfg = HP[key];
@@ -217,13 +222,15 @@
     };
 
     tabs.forEach(function (b) {
-      b.addEventListener("click", function () { clearInterval(auto); auto = null; show(b.getAttribute("data-dev")); });
+      b.addEventListener("click", function () { picked = true; stopAuto(); show(b.getAttribute("data-dev")); });
     });
     show("laptop");
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      var idx = 0;
-      auto = setInterval(function () { idx = (idx + 1) % order.length; show(order[idx]); }, 4200);
-      hp.addEventListener("mouseenter", function () { clearInterval(auto); auto = null; }, { once: true });
+      /* Наведение — пауза, мышь ушла — переключение продолжается.
+         Насовсем останавливается только после нажатия на устройство. */
+      startAuto();
+      hp.addEventListener("mouseenter", stopAuto);
+      hp.addEventListener("mouseleave", function () { if (!picked) startAuto(); });
     }
   }
 
