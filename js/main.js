@@ -28,14 +28,19 @@
     return "<thead><tr><th>" + T.service + ", " + T.lei + "</th><th>" + T.mid + '</th><th class="pc">' + T.one + "</th><th>" + T.hard + "</th></tr></thead>";
   }
 
+  /* Для поиска: нижний регистр, ё→е, румынские буквы без диакритики */
+  function norm(t) {
+    return t.toLowerCase().replace(/ё/g, "е").replace(/[ăâ]/g, "a").replace(/î/g, "i").replace(/[șş]/g, "s").replace(/[țţ]/g, "t");
+  }
+
   function renderTable(key, withLink) {
     var cat = window.TEHVIC_PRICES && window.TEHVIC_PRICES[key];
     if (!cat) return "";
-    var rows = cat.items.map(function (it) {
+    var rows = cat.items.map(function (it, n) {
       var name = it[LANG] || it.ru;
       var cells;
       cells = priceCells(it);
-      return '<tr data-q="' + (name + " " + it.ru + " " + it.ro).toLowerCase() + '"><td class="pn">' + name + "</td>" + cells + "</tr>";
+      return '<tr id="r-' + key + "-" + n + '" data-q="' + norm(name + " " + it.ru + " " + it.ro) + '"><td class="pn">' + name + "</td>" + cells + "</tr>";
     }).join("");
     var link = withLink && PAGES[key] ? '<a href="' + ROOT + PAGES[key] + '">' + T.more + " →</a>" : "";
     /* .pcard — общая карточка: заголовок и таблица на одной подложке */
@@ -90,17 +95,64 @@
     box.innerHTML = '<div class="pcard"><table class="ptable">' + headRow() + "<tbody>" + rows + "</tbody></table></div>";
   });
 
-  /* ---------- Поиск и фильтр на странице цен ---------- */
+  /* ---------- Поиск по прайсу: подсказки + фильтр таблиц ----------
+     Вводите слово («замена») — под полем список подходящих услуг с ценой.
+     Стрелки ↑↓ и Enter или клик — прокрутка к строке прайса с подсветкой.
+     Слова ищутся в любом порядке: «замена клав» найдёт «Замена клавиатуры». */
   var search = document.getElementById("psearch");
   if (search) {
     var empty = document.querySelector(".pempty");
-    search.addEventListener("input", function () {
-      var q = search.value.trim().toLowerCase();
+    var sbox = search.closest(".psearch");
+    var list = document.createElement("ul");
+    list.className = "psuggest"; list.id = "psuggest"; list.setAttribute("role", "listbox"); list.hidden = true;
+    sbox.appendChild(list);
+    search.setAttribute("role", "combobox"); search.setAttribute("aria-controls", "psuggest");
+    search.setAttribute("aria-autocomplete", "list"); search.setAttribute("aria-expanded", "false");
+
+    /* все услуги прайса одним списком */
+    var ALL = [];
+    Object.keys(window.TEHVIC_PRICES || {}).forEach(function (key) {
+      var cat = window.TEHVIC_PRICES[key];
+      cat.items.forEach(function (it, n) {
+        var name = it[LANG] || it.ru;
+        var price = it.mid == null ? T.ask : (it.from ? T.from + " " : "") + it.mid + (it.hard != null ? "–" + it.hard : "") + " " + T.lei;
+        ALL.push({ id: "r-" + key + "-" + n, name: name, cat: cat[LANG], price: price, q: norm(name + " " + it.ru + " " + it.ro + " " + cat.ru + " " + cat.ro) });
+      });
+    });
+
+    var words = function (q) { return norm(q).split(/\s+/).filter(Boolean); };
+    var matches = function (hay, ws) { for (var i = 0; i < ws.length; i++) if (hay.indexOf(ws[i]) < 0) return false; return true; };
+    var esc = function (t) { return t.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+    var mark = function (text, ws) {          // подсветка найденных кусков в названии
+      var low = norm(text), on = [];
+      for (var z = 0; z < text.length; z++) on.push(false);
+      ws.forEach(function (w) { var i = low.indexOf(w); while (i > -1) { for (var k = i; k < i + w.length; k++) on[k] = true; i = low.indexOf(w, i + w.length); } });
+      var out = "", open = false;
+      for (var i = 0; i < text.length; i++) {
+        if (on[i] && !open) { out += "<mark>"; open = true; }
+        if (!on[i] && open) { out += "</mark>"; open = false; }
+        out += esc(text[i]);
+      }
+      return out + (open ? "</mark>" : "");
+    };
+
+    var active = -1;
+    var closeList = function () { list.hidden = true; active = -1; search.setAttribute("aria-expanded", "false"); search.removeAttribute("aria-activedescendant"); };
+    var setActive = function (i) {
+      var items = list.querySelectorAll("li[data-id]");
+      if (!items.length) return;
+      active = (i + items.length) % items.length;
+      items.forEach(function (li, k) { li.classList.toggle("is-on", k === active); li.setAttribute("aria-selected", k === active ? "true" : "false"); });
+      items[active].scrollIntoView({ block: "nearest" });
+      search.setAttribute("aria-activedescendant", items[active].id);
+    };
+
+    var filterTables = function (ws) {
       var any = false;
       document.querySelectorAll(".prices-all .pcard").forEach(function (tb) {
         var shown = 0;
         tb.querySelectorAll("tbody tr").forEach(function (tr) {
-          var ok = !q || tr.getAttribute("data-q").indexOf(q) > -1;
+          var ok = !ws.length || matches(tr.getAttribute("data-q"), ws);
           tr.style.display = ok ? "" : "none";
           if (ok) shown++;
         });
@@ -108,7 +160,49 @@
         if (shown) any = true;
       });
       if (empty) empty.style.display = any ? "none" : "block";
+    };
+
+    var go = function (id) {
+      filterTables([]);                       // показать весь прайс, строка — в своей таблице
+      var row = document.getElementById(id);
+      closeList();
+      if (!row) return;
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.classList.remove("is-found"); void row.offsetWidth; row.classList.add("is-found");
+    };
+
+    search.addEventListener("input", function () {
+      var ws = words(search.value);
+      filterTables(ws);
+      if (!ws.length) { closeList(); return; }
+      var found = ALL.filter(function (x) { return matches(x.q, ws); });
+      list.innerHTML = found.length
+        ? found.map(function (x, k) {
+            return '<li id="ps-' + k + '" role="option" data-id="' + x.id + '"><span class="psuggest__n">' + mark(x.name, ws) +
+              "<small>" + esc(x.cat) + "</small></span><b>" + esc(x.price) + "</b></li>";
+          }).join("") + '<li class="psuggest__all">' + found.length + (LANG === "ro" ? " rezultate · Enter — primul" : " найдено · Enter — первая") + "</li>"
+        : '<li class="psuggest__none">' + T.none + "</li>";
+      list.hidden = false; active = -1; search.setAttribute("aria-expanded", "true");
     });
+
+    search.addEventListener("keydown", function (e) {
+      if (list.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        var items = list.querySelectorAll("li[data-id]");
+        var li = items[active > -1 ? active : 0];
+        if (li) { search.blur(); go(li.getAttribute("data-id")); }
+      } else if (e.key === "Escape") { closeList(); }
+    });
+    list.addEventListener("mousedown", function (e) {   // mousedown — раньше, чем поле потеряет фокус
+      var li = e.target.closest("li[data-id]");
+      if (!li) return;
+      e.preventDefault(); go(li.getAttribute("data-id"));
+    });
+    search.addEventListener("focus", function () { if (search.value.trim() && list.innerHTML) { list.hidden = false; search.setAttribute("aria-expanded", "true"); } });
+    search.addEventListener("blur", function () { setTimeout(closeList, 120); });
   }
   var chips = document.querySelectorAll(".pchip");
   chips.forEach(function (ch) {
