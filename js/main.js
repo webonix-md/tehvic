@@ -237,12 +237,12 @@
   /* Липкая шапка таблиц: на странице «Цены» — под закреплённой панелью поиска */
   var pfilter = document.querySelector(".pfilter");
   if (pfilter) {
-    var setTheadTop = function () {
-      var top = parseFloat(getComputedStyle(pfilter).top) || 0;
-      document.documentElement.style.setProperty("--thead-top", Math.round(top + pfilter.offsetHeight) + "px");
+    var setTheadTop = function () {   // высота панели; общий сдвиг от выехавшей шапки — --top-offset
+      document.documentElement.style.setProperty("--pf-h", pfilter.offsetHeight + "px");
     };
     setTheadTop();
     window.addEventListener("resize", setTheadTop);
+    window.addEventListener("load", setTheadTop);   // после загрузки шрифтов высота панели может измениться
   }
 
   /* Поле в шапке и в мобильном меню — на всех страницах */
@@ -261,6 +261,49 @@
       ch.classList.add("is-on");
     });
   });
+
+  /* ---------- «Умная» шапка ----------
+     Верхняя строка и шапка собраны в один липкий блок .site-top.
+     Прокрутка вниз — блок уезжает вверх; прокрутка вверх — выезжает.
+     На телефоне выезжает только шапка (строка с городом остаётся скрытой).
+     --top-offset — сколько сейчас занимает выехавшая шапка: по нему сдвигаются
+     панель поиска на «Ценах» и шапки таблиц прайса. */
+  (function () {
+    var topbar = document.querySelector(".topbar"), header = document.querySelector(".header");
+    if (!topbar || !header) return;
+    var box = document.createElement("div");
+    box.className = "site-top";
+    topbar.parentNode.insertBefore(box, topbar);
+    box.appendChild(topbar); box.appendChild(header);
+    var root = document.documentElement;
+    var mq = window.matchMedia("(max-width:960px)");
+    var lastY = window.scrollY, state = "";
+
+    var setState = function (st) {
+      if (st === state) return;
+      state = st;
+      box.classList.toggle("is-hidden", st === "hidden");
+      box.classList.toggle("is-compact", st === "compact");
+      var shown = st === "hidden" ? 0 : st === "compact" ? box.offsetHeight - topbar.offsetHeight : box.offsetHeight;
+      root.style.setProperty("--top-offset", (st === "top" ? 0 : shown) + "px");
+      root.style.setProperty("--topbar-h", topbar.offsetHeight + "px");
+    };
+    var busy = function () {           // не прятать, пока открыто меню или идёт поиск
+      return document.querySelector(".nav__item.is-open") ||
+             (document.activeElement && document.activeElement.closest && document.activeElement.closest(".site-top .gsearch"));
+    };
+    var onScroll = function () {
+      var y = window.scrollY, dy = y - lastY;
+      if (y <= box.offsetHeight) { setState("top"); lastY = y; return; }
+      if (Math.abs(dy) < 6) return;
+      if (dy > 0 && !busy()) setState("hidden");
+      else if (dy < 0) setState(mq.matches ? "compact" : "shown");
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", function () { state = ""; onScroll(); });
+    setState("top");
+  })();
 
   /* ---------- Мега-меню ---------- */
   var megaItem = document.querySelector(".nav__item--mega");
