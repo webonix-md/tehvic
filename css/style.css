@@ -717,3 +717,25 @@ a.cell:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
 html{scroll-padding-top:calc(var(--top-offset,0px) + var(--pf-h,0px) + 24px)}
 .header{padding-top:0}
 @media (prefers-reduced-motion:reduce){.site-top,.pfilter,.ptable thead th{transition:none}}
+
+/* ---------- Узкие экраны (до 380px): ничего не шире экрана ---------- */
+.split>*,.pfilter>.wrap>*,.pchips{min-width:0}
+@media (max-width:380px){
+  .ptable td:first-child,.ptable th:first-child{padding-left:10px}
+  .ptable td:last-child,.ptable th:last-child{padding-right:10px}
+  .ptable td.pp{padding-left:3px;padding-right:3px;font-size:13px}
+  .ptable td.pn{font-size:14px;padding-right:4px;overflow-wrap:anywhere}
+  .ptable th{font-size:9px;padding-left:3px;padding-right:3px}
+}
+
+/* ---------- Доступность ---------- */
+.skip{position:absolute;left:12px;top:-60px;z-index:200;padding:12px 18px;border-radius:12px;background:var(--ink);color:#fff;font:500 15px/1 var(--sans);text-decoration:none;transition:top .2s}
+.skip:focus{top:12px}
+main:focus{outline:none}
+/* Кнопка паузы смены устройств в первом экране */
+.hpick__panel{position:relative}
+.hpick__pause{position:absolute;right:14px;top:-50px;z-index:4;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:11px;background:var(--surface);box-shadow:var(--sh);color:var(--ink-2);cursor:pointer}
+.hpick__pause:hover{color:var(--accent)}
+.hpick__pause .ico{width:16px;height:16px;stroke-width:2.2}
+.hpick__pause[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.hpick__pause{display:none}}

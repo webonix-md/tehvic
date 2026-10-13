@@ -424,6 +424,22 @@
       startAuto();
       hp.addEventListener("mouseenter", stopAuto);
       hp.addEventListener("mouseleave", function () { if (!picked) startAuto(); });
+      /* Кнопка «пауза/запуск» — смену можно остановить без мыши (требование доступности) */
+      var pbtn = hp.querySelector(".hpick__pause");
+      if (pbtn) {
+        var ICO = pbtn.querySelector("use");
+        var setBtn = function (paused) {
+          pbtn.setAttribute("aria-pressed", paused ? "true" : "false");
+          ICO.setAttribute("href", ICO.getAttribute("href").replace(/#(pause|play)$/, paused ? "#play" : "#pause"));
+          pbtn.setAttribute("aria-label", paused ? (LANG === "ro" ? "Pornește schimbarea dispozitivelor" : "Запустить смену устройств")
+                                                 : (LANG === "ro" ? "Oprește schimbarea dispozitivelor" : "Остановить смену устройств"));
+        };
+        pbtn.addEventListener("click", function () {
+          if (picked) { picked = false; startAuto(); setBtn(false); }
+          else { picked = true; stopAuto(); setBtn(true); }
+        });
+        tabs.forEach(function (b) { b.addEventListener("click", function () { setBtn(true); }); });
+      }
     }
   }
 
