@@ -75,13 +75,22 @@
     }
   });
 
-  /* data-price="laptop:5" → «от 400 лей» (конкретная строка прайса, цена «средне») */
+  /* data-price — цена конкретной строки прайса (в текстах, вопросах, первом экране):
+       "laptop:5"        → «от 400 лей» / «400 лей»  — цена «средне»
+       "laptop:5:hard"   → «от 600 лей»               — цена «сложно»
+       "power:5:range"   → «200–300 лей»              — от и до
+       "display:5:min"   → «от 200 лей»               — всегда с «от» */
   document.querySelectorAll("[data-price]").forEach(function (el) {
     var p = el.getAttribute("data-price").split(":");
     var cat = getCat(p[0]);
     var it = cat && cat.items[+p[1]];
     if (!it || it.mid == null) return;
-    el.textContent = (it.from ? T.from + " " : "") + it.mid + " " + T.lei;
+    var mode = p[2] || "", txt;
+    if (mode === "hard" && it.hard != null) txt = (it.fromHard ? T.from + " " : "") + it.hard;
+    else if (mode === "range" && it.hard != null) txt = it.mid + "–" + it.hard;
+    else if (mode === "min") txt = T.from + " " + it.mid;
+    else txt = (it.from ? T.from + " " : "") + it.mid;
+    el.textContent = txt + " " + T.lei;
   });
 
   /* data-pick="laptop:1,pc:0" → таблица «популярные услуги» из отдельных строк */
