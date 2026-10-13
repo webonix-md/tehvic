@@ -95,58 +95,126 @@
     box.innerHTML = '<div class="pcard"><table class="ptable">' + headRow() + "<tbody>" + rows + "</tbody></table></div>";
   });
 
-  /* ---------- Поиск по прайсу: подсказки + фильтр таблиц ----------
-     Вводите слово («замена») — под полем список подходящих услуг с ценой.
-     Стрелки ↑↓ и Enter или клик — прокрутка к строке прайса с подсветкой.
+  /* ---------- Поиск услуг: подсказки (шапка на всех страницах + страница цен) ----------
+     Вводите слово («замена») — под полем список услуг с ценой, направления — сверху.
+     Стрелки ↑↓ и Enter или клик:
+       • строка прайса есть на этой странице — прокрутка к ней с подсветкой;
+       • нет — переход на страницу услуги к нужной строке (#r-laptop-4).
+     Enter без выбора — страница «Цены» с отфильтрованным прайсом (?q=…).
      Слова ищутся в любом порядке: «замена клав» найдёт «Замена клавиатуры». */
+  var PRICES_PAGE = LANG === "ro" ? "preturi.html" : "ceny.html";
+  var words = function (q) { return norm(q).split(/\s+/).filter(Boolean); };
+  var matches = function (hay, ws) { for (var i = 0; i < ws.length; i++) if (hay.indexOf(ws[i]) < 0) return false; return true; };
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var mark = function (text, ws) {            // подсветка найденных кусков
+    var low = norm(text), on = [];
+    for (var z = 0; z < text.length; z++) on.push(false);
+    ws.forEach(function (w) { var i = low.indexOf(w); while (i > -1) { for (var k = i; k < i + w.length; k++) on[k] = true; i = low.indexOf(w, i + w.length); } });
+    var out = "", open = false;
+    for (var i = 0; i < text.length; i++) {
+      if (on[i] && !open) { out += "<mark>"; open = true; }
+      if (!on[i] && open) { out += "</mark>"; open = false; }
+      out += esc(text[i]);
+    }
+    return out + (open ? "</mark>" : "");
+  };
+
+  /* Индекс: направления + все услуги прайса */
+  var IDX = [];
+  Object.keys(window.TEHVIC_PRICES || {}).forEach(function (key) {
+    var cat = window.TEHVIC_PRICES[key];
+    IDX.push({ kind: "cat", href: ROOT + PAGES[key], name: cat[LANG], sub: T.more, q: norm(cat.ru + " " + cat.ro) });
+    cat.items.forEach(function (it, n) {
+      var name = it[LANG] || it.ru;
+      var price = it.mid == null ? T.ask : (it.from ? T.from + " " : "") + it.mid + (it.hard != null ? "–" + it.hard : "") + " " + T.lei;
+      IDX.push({ kind: "row", id: "r-" + key + "-" + n, href: ROOT + PAGES[key] + "#r-" + key + "-" + n,
+                 name: name, sub: cat[LANG], price: price, q: norm(name + " " + it.ru + " " + it.ro + " " + cat.ru + " " + cat.ro) });
+    });
+  });
+
+  var flashRow = function (row) {
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.classList.remove("is-found"); void row.offsetWidth; row.classList.add("is-found");
+  };
+
+  /* Подключение подсказок к полю. opts.onInput(ws) — доп. действие (фильтр таблиц) */
+  var uid = 0;
+  function attachSuggest(input, opts) {
+    opts = opts || {};
+    var list = document.createElement("ul");
+    var id = "sg-" + (++uid);
+    list.className = "psuggest"; list.id = id; list.setAttribute("role", "listbox"); list.hidden = true;
+    input.parentNode.appendChild(list);
+    input.setAttribute("role", "combobox"); input.setAttribute("aria-controls", id);
+    input.setAttribute("aria-autocomplete", "list"); input.setAttribute("aria-expanded", "false");
+    var active = -1;
+
+    var closeList = function () { list.hidden = true; active = -1; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); };
+    var items = function () { return list.querySelectorAll("li[data-k]"); };
+    var setActive = function (i) {
+      var it = items(); if (!it.length) return;
+      active = (i + it.length) % it.length;
+      it.forEach(function (li, k) { li.classList.toggle("is-on", k === active); li.setAttribute("aria-selected", k === active ? "true" : "false"); });
+      it[active].scrollIntoView({ block: "nearest" });
+      input.setAttribute("aria-activedescendant", it[active].id);
+    };
+    var found = [];
+    var pick = function (x) {
+      closeList();
+      if (x.kind === "row") {
+        if (opts.onInput) opts.onInput([]);          // на странице цен — показать весь прайс
+        var row = document.getElementById(x.id);
+        if (row && row.offsetParent !== null) { input.blur(); flashRow(row); return; }
+      }
+      location.href = x.href;
+    };
+
+    input.addEventListener("input", function () {
+      var ws = words(input.value);
+      if (opts.onInput) opts.onInput(ws);
+      if (!ws.length) { closeList(); return; }
+      var cats = IDX.filter(function (x) { return x.kind === "cat" && matches(x.q, ws); });
+      var rows = IDX.filter(function (x) { return x.kind === "row" && matches(x.q, ws); });
+      found = cats.concat(rows);
+      list.innerHTML = found.length
+        ? found.map(function (x, k) {
+            return '<li id="' + id + "-" + k + '" role="option" data-k="' + k + '"' + (x.kind === "cat" ? ' class="is-cat"' : "") +
+              '><span class="psuggest__n">' + mark(x.name, ws) + "<small>" + esc(x.sub) + "</small></span>" +
+              (x.price ? "<b>" + esc(x.price) + "</b>" : '<svg class="ico" aria-hidden="true"><use href="' + ICONS + '#arrow"/></svg>') + "</li>";
+          }).join("") + '<li class="psuggest__all">' + (LANG === "ro" ? "Găsite: " : "Найдено: ") + rows.length + (LANG === "ro" ? " · Enter — toate în lista de prețuri" : " · Enter — все в прайсе") + "</li>"
+        : '<li class="psuggest__none">' + T.none + "</li>";
+      list.hidden = false; active = -1; input.setAttribute("aria-expanded", "true");
+    });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { closeList(); return; }
+      if (e.key === "ArrowDown" && !list.hidden) { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === "ArrowUp" && !list.hidden) { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        if (active > -1 && found[active]) { pick(found[active]); return; }
+        var q = input.value.trim();
+        if (!q) return;
+        if (opts.onInput) { closeList(); input.blur(); return; }   // уже на странице цен — фильтр применён
+        location.href = ROOT + PRICES_PAGE + "?q=" + encodeURIComponent(q);
+      }
+    });
+    list.addEventListener("mousedown", function (e) {     // mousedown — раньше, чем поле потеряет фокус
+      var li = e.target.closest("li[data-k]");
+      if (!li) return;
+      e.preventDefault(); pick(found[+li.getAttribute("data-k")]);
+    });
+    input.addEventListener("focus", function () { if (input.value.trim() && list.innerHTML) { list.hidden = false; input.setAttribute("aria-expanded", "true"); } });
+    input.addEventListener("blur", function () { setTimeout(closeList, 150); });
+  }
+
+  /* Путь к иконкам: на румынских страницах — уровень выше */
+  var ICONS = (document.querySelector('link[rel="stylesheet"]').getAttribute("href").indexOf("../") === 0 ? "../" : "") + "img/icons.svg";
+
+  /* Страница цен: поле + фильтр таблиц, ?q= из шапки */
   var search = document.getElementById("psearch");
   if (search) {
     var empty = document.querySelector(".pempty");
-    var sbox = search.closest(".psearch");
-    var list = document.createElement("ul");
-    list.className = "psuggest"; list.id = "psuggest"; list.setAttribute("role", "listbox"); list.hidden = true;
-    sbox.appendChild(list);
-    search.setAttribute("role", "combobox"); search.setAttribute("aria-controls", "psuggest");
-    search.setAttribute("aria-autocomplete", "list"); search.setAttribute("aria-expanded", "false");
-
-    /* все услуги прайса одним списком */
-    var ALL = [];
-    Object.keys(window.TEHVIC_PRICES || {}).forEach(function (key) {
-      var cat = window.TEHVIC_PRICES[key];
-      cat.items.forEach(function (it, n) {
-        var name = it[LANG] || it.ru;
-        var price = it.mid == null ? T.ask : (it.from ? T.from + " " : "") + it.mid + (it.hard != null ? "–" + it.hard : "") + " " + T.lei;
-        ALL.push({ id: "r-" + key + "-" + n, name: name, cat: cat[LANG], price: price, q: norm(name + " " + it.ru + " " + it.ro + " " + cat.ru + " " + cat.ro) });
-      });
-    });
-
-    var words = function (q) { return norm(q).split(/\s+/).filter(Boolean); };
-    var matches = function (hay, ws) { for (var i = 0; i < ws.length; i++) if (hay.indexOf(ws[i]) < 0) return false; return true; };
-    var esc = function (t) { return t.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
-    var mark = function (text, ws) {          // подсветка найденных кусков в названии
-      var low = norm(text), on = [];
-      for (var z = 0; z < text.length; z++) on.push(false);
-      ws.forEach(function (w) { var i = low.indexOf(w); while (i > -1) { for (var k = i; k < i + w.length; k++) on[k] = true; i = low.indexOf(w, i + w.length); } });
-      var out = "", open = false;
-      for (var i = 0; i < text.length; i++) {
-        if (on[i] && !open) { out += "<mark>"; open = true; }
-        if (!on[i] && open) { out += "</mark>"; open = false; }
-        out += esc(text[i]);
-      }
-      return out + (open ? "</mark>" : "");
-    };
-
-    var active = -1;
-    var closeList = function () { list.hidden = true; active = -1; search.setAttribute("aria-expanded", "false"); search.removeAttribute("aria-activedescendant"); };
-    var setActive = function (i) {
-      var items = list.querySelectorAll("li[data-id]");
-      if (!items.length) return;
-      active = (i + items.length) % items.length;
-      items.forEach(function (li, k) { li.classList.toggle("is-on", k === active); li.setAttribute("aria-selected", k === active ? "true" : "false"); });
-      items[active].scrollIntoView({ block: "nearest" });
-      search.setAttribute("aria-activedescendant", items[active].id);
-    };
-
     var filterTables = function (ws) {
       var any = false;
       document.querySelectorAll(".prices-all .pcard").forEach(function (tb) {
@@ -161,49 +229,31 @@
       });
       if (empty) empty.style.display = any ? "none" : "block";
     };
-
-    var go = function (id) {
-      filterTables([]);                       // показать весь прайс, строка — в своей таблице
-      var row = document.getElementById(id);
-      closeList();
-      if (!row) return;
-      row.scrollIntoView({ behavior: "smooth", block: "center" });
-      row.classList.remove("is-found"); void row.offsetWidth; row.classList.add("is-found");
-    };
-
-    search.addEventListener("input", function () {
-      var ws = words(search.value);
-      filterTables(ws);
-      if (!ws.length) { closeList(); return; }
-      var found = ALL.filter(function (x) { return matches(x.q, ws); });
-      list.innerHTML = found.length
-        ? found.map(function (x, k) {
-            return '<li id="ps-' + k + '" role="option" data-id="' + x.id + '"><span class="psuggest__n">' + mark(x.name, ws) +
-              "<small>" + esc(x.cat) + "</small></span><b>" + esc(x.price) + "</b></li>";
-          }).join("") + '<li class="psuggest__all">' + found.length + (LANG === "ro" ? " rezultate · Enter — primul" : " найдено · Enter — первая") + "</li>"
-        : '<li class="psuggest__none">' + T.none + "</li>";
-      list.hidden = false; active = -1; search.setAttribute("aria-expanded", "true");
-    });
-
-    search.addEventListener("keydown", function (e) {
-      if (list.hidden) return;
-      if (e.key === "ArrowDown") { e.preventDefault(); setActive(active + 1); }
-      else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active - 1); }
-      else if (e.key === "Enter") {
-        e.preventDefault();
-        var items = list.querySelectorAll("li[data-id]");
-        var li = items[active > -1 ? active : 0];
-        if (li) { search.blur(); go(li.getAttribute("data-id")); }
-      } else if (e.key === "Escape") { closeList(); }
-    });
-    list.addEventListener("mousedown", function (e) {   // mousedown — раньше, чем поле потеряет фокус
-      var li = e.target.closest("li[data-id]");
-      if (!li) return;
-      e.preventDefault(); go(li.getAttribute("data-id"));
-    });
-    search.addEventListener("focus", function () { if (search.value.trim() && list.innerHTML) { list.hidden = false; search.setAttribute("aria-expanded", "true"); } });
-    search.addEventListener("blur", function () { setTimeout(closeList, 120); });
+    attachSuggest(search, { onInput: filterTables });
+    var q0 = new URLSearchParams(location.search).get("q");
+    if (q0) { search.value = q0; filterTables(words(q0)); }
   }
+
+  /* Липкая шапка таблиц: на странице «Цены» — под закреплённой панелью поиска */
+  var pfilter = document.querySelector(".pfilter");
+  if (pfilter) {
+    var setTheadTop = function () {
+      var top = parseFloat(getComputedStyle(pfilter).top) || 0;
+      document.documentElement.style.setProperty("--thead-top", Math.round(top + pfilter.offsetHeight) + "px");
+    };
+    setTheadTop();
+    window.addEventListener("resize", setTheadTop);
+  }
+
+  /* Поле в шапке и в мобильном меню — на всех страницах */
+  document.querySelectorAll(".gsearch input").forEach(function (inp) { attachSuggest(inp); });
+
+  /* Пришли по ссылке #r-… — подсветить строку прайса */
+  if (/^#r-/.test(location.hash)) {
+    var hrow = document.getElementById(location.hash.slice(1));
+    if (hrow) setTimeout(function () { flashRow(hrow); }, 250);
+  }
+
   var chips = document.querySelectorAll(".pchip");
   chips.forEach(function (ch) {
     ch.addEventListener("click", function () {
@@ -233,6 +283,12 @@
 
   /* ---------- Мобильное меню ---------- */
   var mnav = document.getElementById("mnav");
+  document.querySelectorAll("[data-mnav-search]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var inp = document.querySelector("#mnav .gsearch input");
+      if (inp) setTimeout(function () { inp.focus(); }, 60);
+    });
+  });
   document.querySelectorAll("[data-mnav]").forEach(function (b) {
     b.addEventListener("click", function () {
       var on = !mnav.classList.contains("is-open");
