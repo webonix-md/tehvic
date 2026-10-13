@@ -696,3 +696,8 @@ a.cell:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
 @media (max-width:960px){
   .hpick__panel{margin-bottom:36px;box-shadow:var(--sh)}   /* короткая тень — не ложится на плитки ниже */
 }
+/* Фото входа на большой плитке: на телефоне выше, чтобы была видна вывеска DISICOM */
+@media (max-width:640px){
+  .trust .ph--big{min-height:420px}
+  .trust .ph--big img{object-position:50% 22%}
+}
