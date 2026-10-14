@@ -744,13 +744,55 @@ main:focus{outline:none}
    Объём — стопка теней text-shadow: каждый слой на шаг (0.01em) ниже-правее и темнее + мягкая тень на фон.
    Чтобы уменьшить объём — убрать последний слой перед мягкой тенью; добавить — дописать слой с шагом +0.01em. */
 :root{
-  --x3d:0.010em 0.011em 0 #1F2024,0.020em 0.022em 0 #0C0D0F,0.06em 0.09em 0.14em rgba(30,30,25,.24);                 /* графитовые, 2 слоя */
+  --x3d:0.010em 0.011em 0 #1F2024,/* 0.020em 0.022em 0 #0C0D0F, */0.06em 0.09em 0.1em rgba(30,30,25,.2);                 /* графитовые, 1 слой */
   --x3d-sm:0.010em 0.011em 0 #1A1B1F,0.04em 0.07em 0.1em rgba(30,30,25,.18);                                            /* заголовки секций, 1 слой */
-  --x3d-acc:0.010em 0.011em 0 #C9530A,0.020em 0.022em 0 #B54A06,0.030em 0.033em 0 #A04003,0.07em 0.1em 0.16em rgba(255,110,20,.25);  /* оранжевые, 3 слоя */
-  --x3d-light:0.010em 0.011em 0 #C4C6CC,0.020em 0.022em 0 #A9ABB2,0.030em 0.033em 0 #8E9098,0.06em 0.09em 0.12em rgba(0,0,0,.55);     /* белые на тёмном, 3 слоя */
+  --x3d-acc:0.010em 0.011em 0 #C9530A,/* 0.020em 0.022em 0 #B54A06,0.030em 0.033em 0 #A04003, */0.07em 0.1em 0.1em rgba(255,110,20,.2);  /* оранжевые, 1 слой */
+  --x3d-light:0.010em 0.011em 0 #C4C6CC,0.020em 0.022em 0 #A9ABB2,/* 0.030em 0.033em 0 #8E9098, */0.06em 0.09em 0.12em rgba(0,0,0,.25);     /* белые на тёмном, 2 слоя */
   --h-ink:#41444B;   /* цвет графитовых заголовков — чуть светлее текста, чтобы грань была заметна */
 }
 .hero .h1,.phead .h1{color:var(--h-ink);text-shadow:var(--x3d);padding-bottom:.08em}
 .hero .h1 em{color:var(--accent);text-shadow:var(--x3d-acc)}
 .sec:not(.sec--dark) .h2{color:var(--h-ink);text-shadow:var(--x3d-sm)}
 .sec--dark .h2{text-shadow:var(--x3d-light)}
+
+/* ---------- Объёмные кнопки (как оранжевая плитка в сцене) ----------
+   Толщина — стопка box-shadow без размытия, сдвинутых вправо-вниз на 1px каждая и темнее; под ней мягкая тень.
+   Обычное — 2 слоя; наведение — 3 слоя и сдвиг на 1px вверх-влево; нажатие — 1 слой и сдвиг на 1px вниз-вправо.
+   (Сдвиг кнопки = разница в числе слоёв, тогда она не «дёргается».) */
+:root{
+  --b3d-acc:1px 1px 0 #E8640F,2px 2px 0 #DC5D0C,6px 12px 20px -8px rgba(255,110,20,.55),inset 0 1px 0 rgba(255,255,255,.35);
+  --b3d-acc-h:1px 1px 0 #E8640F,2px 2px 0 #DC5D0C,3px 3px 0 #CF560A,8px 18px 26px -8px rgba(255,110,20,.6),inset 0 1px 0 rgba(255,255,255,.35);
+  --b3d-acc-a:1px 1px 0 #DC5D0C,3px 4px 10px -4px rgba(255,110,20,.5),inset 0 1px 0 rgba(255,255,255,.25);
+  --b3d:1px 1px 0 #E6E6E2,2px 2px 0 #DDDDD8,6px 12px 20px -10px rgba(40,40,30,.35),inset 0 1px 0 #fff;
+  --b3d-h:1px 1px 0 #E6E6E2,2px 2px 0 #DDDDD8,3px 3px 0 #D4D4CF,8px 18px 26px -10px rgba(40,40,30,.38),inset 0 1px 0 #fff;
+  --b3d-a:1px 1px 0 #DDDDD8,3px 4px 10px -6px rgba(40,40,30,.3),inset 0 1px 0 #fff;
+  --b3d-dark:1px 1px 0 #26282C,2px 2px 0 #202226,6px 12px 20px -10px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+  --b3d-dark-h:1px 1px 0 #26282C,2px 2px 0 #202226,3px 3px 0 #1B1C1F,8px 18px 26px -10px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.08);
+  --b3d-dark-a:1px 1px 0 #202226,3px 4px 10px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);
+}
+.btn{box-shadow:var(--b3d);transform:translate(0,0);transition:transform .15s ease,box-shadow .15s ease,background .2s}
+.btn:hover{box-shadow:var(--b3d-h);transform:translate(-1px,-1px)}
+.btn:active{box-shadow:var(--b3d-a);transform:translate(1px,1px)}
+.btn--accent{background:linear-gradient(180deg,#FF9445,#FF7A1A);box-shadow:var(--b3d-acc)}
+.btn--accent:hover{box-shadow:var(--b3d-acc-h)}
+.btn--accent:active{box-shadow:var(--b3d-acc-a)}
+.sec--dark .btn:not(.btn--accent){box-shadow:var(--b3d-dark)}
+.sec--dark .btn:not(.btn--accent):hover{box-shadow:var(--b3d-dark-h)}
+.sec--dark .btn:not(.btn--accent):active{box-shadow:var(--b3d-dark-a)}
+.dock a:first-child{background:linear-gradient(180deg,#FF9445,#FF7A1A);box-shadow:var(--b3d-acc);transition:transform .15s ease,box-shadow .15s ease}
+.dock a:first-child:active{transform:translate(1px,1px);box-shadow:var(--b3d-acc-a)}
+@media (prefers-reduced-motion:reduce){.btn,.btn:hover,.btn:active{transform:none}}
+
+/* ---------- Объёмные плашки (тот же приём, что у кнопок) ----------
+   2 слоя бортика вправо-вниз + мягкая тень; у карточек-ссылок при наведении 3 слоя и подъём на 1px. */
+:root{
+  --c3d:1px 1px 0 #E6E6E2,2px 2px 0 #DDDDD8,6px 14px 26px -16px rgba(40,40,30,.28);
+  --c3d-h:1px 1px 0 #E6E6E2,2px 2px 0 #DDDDD8,3px 3px 0 #D4D4CF,10px 20px 32px -16px rgba(40,40,30,.32);
+  --c3d-dark:1px 1px 0 #1E2023,2px 2px 0 #18191C,6px 14px 26px -16px rgba(0,0,0,.6);
+}
+.cat,.cell,.faults li,.rel a,.review,.pcard,.faq details,.trust__rate,.spec,.hpick__panel,.req div,.pnote span,.hero__fact{box-shadow:var(--c3d)}
+.cat,a.cell,.rel a{transition:transform .15s ease,box-shadow .15s ease}
+.cat:hover,a.cell:hover,.rel a:hover{box-shadow:var(--c3d-h);transform:translate(-1px,-1px)}
+.sec--dark .step,.sec--dark .cta__contacts a,.sec--dark .cta__contacts div{box-shadow:var(--c3d-dark)}
+.hpick__tab.is-on{box-shadow:1px 1px 0 #E6E6E2,2px 2px 0 #DDDDD8,4px 8px 14px -8px rgba(40,40,30,.3)}
+@media (max-width:960px){.hpick__panel{box-shadow:var(--c3d)}}
